@@ -1,29 +1,34 @@
 class Table:
     def __init__(self, columns, rows):
-
-        if len(set(columns)) != len(columns):
-            raise ValueError('Ожидались уникальные столбцы!')
-
-        for row in rows:
-
-            if len(row) != len(columns):
-                raise ValueError('Некорректная запись!')
-
-        self._columns = tuple(columns)
+        self._columns = columns
         self._rows = rows
         self._types = [str] * len(columns)
 
+    def _isdigit(self, column):
+        if not isinstance(column, int):
+            name_to_index = {}
+            column_index = self._columns.index(column)
+            name_to_index[column] = column_index
+            return False, name_to_index
+        else:
+            column_index = self._columns.index(column)
+            return True, column_index
+
     def get_values(self, column_name):
         column = column_name
-        if not column.isdigit(): # если название столбца != индексу
-            column = name_to_index[column] # берём индекс столбца по названию
-
-        column_index = self._columns.index(column)
         values = []
+        if self._isdigit(column):
 
-        for row in self._rows:
-            values.append(row[column_index])
-        return values
+            for row in self._rows:
+                values.append(row[column_index])
+
+            return values
+        else:
+
+            for row in self._rows:
+                values.append(row[column])
+
+            return values
 
     def set_values(self, column, values):
         if len(self._rows) != len(values):
