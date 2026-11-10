@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 class Table:
     def __init__(self, columns, rows):
 
@@ -12,10 +10,14 @@ class Table:
                 raise ValueError('Некорректная запись!')
 
         self._columns = tuple(columns)
-        self._rows = deepcopy(rows)
+        self._rows = rows
         self._types = [str] * len(columns)
 
-    def get_values(self, column):
+    def get_values(self, column_name):
+        column = column_name
+        if not column.isdigit(): # если название столбца != индексу
+            column = name_to_index[column] # берём индекс столбца по названию
+
         column_index = self._columns.index(column)
         values = []
 
@@ -56,19 +58,4 @@ class Table:
                 row[column_index] = values[i]
 
             self._types[column_index] = column_type
-table = Table(
-    ["name", "age", "score"],
-    [
-        ["Аня", "18", "85.5"],
-        ["Даня", "19", "92.0"]
-    ]
-)
 
-table.set_column_types({
-    "age": int,
-    "score": float
-})
-
-print(table.get_values("age"))
-print(table.get_values("score"))
-print(table.get_column_types())
