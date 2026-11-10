@@ -1,44 +1,46 @@
 from .table import Table
 import csv
 
+# преобразует csv в словарь
+def get_dictionary(path, header, delimiter, encoding, newline):
+    with open(path, mode='r', encoding=encoding, newline=newline) as file:
+        reader = csv.reader(file, delimiter=delimiter)
+        rows = list(reader)
 
-def load_table(*paths, header=None, encoding="utf-8", delimiter=",", newline=""):
-    tables = []
-    paths_len = len(paths)
+    if not rows:
+        return {}
 
-    if paths_len == 0:
+    if isinstance(header, (list, tuple)):
+        column_names = list(header)
+    elif header is True:
+        column_names = rows[0]
+        rows = rows[1:]
+    elif header is None:
+        column_names = list(range(len(rows[0])))
+    else:
+        raise ValueError("header must be list or tuple or None or True")
+
+    data = {col: [] for col in column_names}
+    for row in rows:
+        for idx, value in enumerate(row):
+            print(idx, value, column_names[idx])
+            data[column_names[idx]].append(value)
+
+    return data
+
+# создаёт таблицы из словарей, созданных в get_dictionary
+def load_table(*paths, header=True, encoding="utf-8", delimiter=",", newline=""):
+    if not paths:
         return None
 
-    if header is None or isinstance(header, int):
-        header = [header] * paths_len
-    elif isinstance(header, list):
-        if len(header) != paths_len:
-            raise ValueError("ДОДЕЛАТЬ")
-    else:
-        raise ValueError("ДОДЕЛАТЬ")
+    tables = []
 
+    for path in paths:
+        data = get_dictionary(
+            path, header=header, delimiter=delimiter,
+            encoding=encoding, newline=newline
+        )
 
-    for idx in range(paths_len):
-        dct = {"age": 0, "number"}
-        with open(paths[idx], mode="r", encoding=encoding, newline=newline) as file:
-            csv_table = csv.reader(file, delimiter=delimiter)
-
-            i = -1
-            for row in csv_table:
-                i += 1
-
-                if i == header[idx]:
-                    columns = row
-                    continue
-
-                rows.append(row)
-
-            if header[idx] is None and rows:
-                columns = [i for i in range(len(rows[0]))]
-
-        tables.append(Table(columns, rows))
+        tables.append(Table(data))
 
     return tables[0] if len(tables) == 1 else tables
-
-
-def save_table(table, name, path, max_rows)
