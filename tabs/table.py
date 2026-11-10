@@ -1,3 +1,4 @@
+
 class Table:
     def __init__(self, data):
         self._columns = list(data)
@@ -22,36 +23,28 @@ class Table:
         return self._data[column].copy()
 
     def set_values(self, column, values):
-        if len(self._rows) != len(values):
-            raise ValueError('Не совпадают строки и значения!')
-
-        column_index = self._columns.index(column)
-
-        for i, row in enumerate(self._rows):
-            row[column_index] = values[i]
+        column = self._resolve_column(column)
+        if len(values) != len(self._data[column]):
+            raise ValueError('Количество новых значений не равно количеству строк!')
+        else:
+            self._data[column][:] = values
 
     def get_column_types(self):
-        columns_types = {}
-        for column, column_type in zip(self._columns, self._types):
-            columns_types[column] = column_type
-        return columns_types
+        return self._types.copy()
 
     def set_column_types(self, column_types):
         converted_columns = {}
-#  Готовим новые значения
-        for column, column_type in column_types.items():
-            column_index = self._columns.index(column)
+
+        for col, col_type in column_types.items():
+            col = self._resolve_column(col)
+            values = self._data[col]
             converted_values = []
 
-            for row in self._rows:
-                converted_values.append(column_type(row[column_index]))
-            converted_columns[column_index] = (column_type, converted_values)
-#  Изменяем таблицу
-        for column_index, (column_type, values) in converted_columns.items():
+            for value in values:
+                converted_values.append(col_type(value))
+            converted_columns[col] = (col_type, converted_values)
 
-            for i, row in enumerate(self._rows):
-
-                row[column_index] = values[i]
-
-            self._types[column_index] = column_type
-
+        for col, col_converted in converted_columns.items():
+            col_type, values = col_converted
+            self._data[col][:] = values
+            self._types[col] = col_type
