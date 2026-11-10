@@ -1,34 +1,25 @@
 class Table:
-    def __init__(self, columns, rows):
-        self._columns = columns
-        self._rows = rows
-        self._types = [str] * len(columns)
+    def __init__(self, data):
+        self._columns = list(data)
+        self._data = {}
 
-    def _isdigit(self, column):
-        if not isinstance(column, int):
-            name_to_index = {}
-            column_index = self._columns.index(column)
-            name_to_index[column] = column_index
-            return False, name_to_index
+        for col, rows in data.items():
+            self._data[col] = rows.copy()
+
+        self._types = {}
+
+        for cols in self._columns:
+            self._types[cols] = str
+
+    def _resolve_column(self, column):
+        if isinstance(column, int):
+            return self._columns[column]
         else:
-            column_index = self._columns.index(column)
-            return True, column_index
+            return column
 
-    def get_values(self, column_name):
-        column = column_name
-        values = []
-        if self._isdigit(column):
-
-            for row in self._rows:
-                values.append(row[column_index])
-
-            return values
-        else:
-
-            for row in self._rows:
-                values.append(row[column])
-
-            return values
+    def get_values(self, column):
+        column = self._resolve_column(column)
+        return self._data[column].copy()
 
     def set_values(self, column, values):
         if len(self._rows) != len(values):
