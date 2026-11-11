@@ -1,0 +1,21 @@
+id,name,age,city,salary,department,notes
+1,Alice Johnson,30,Moscow,85000,Engineering,"senior, team lead"
+2,Bob Smith,25,SPb,55000,Sales,
+3,Charlie Brown,35,Novosibirsk,120000,Engineering,"remote, part-time"
+4,Дмитрий Иванов,28,Казань,70000,Marketing,кириллица
+5,Eve Davis,42,St. Petersburg,95000,Finance,"has ""quotes"" inside"
+6,Frank Miller,,Omsk,60000,Support,no age
+7,Grace Lee,31,Yekaterinburg,78000,Engineering,
+8,Henry Wilson,45,Sochi,150000,Finance,"CFO, board member"
+9,Иван Петров,33,Moscow,88000,Sales,
+10,Judy Garcia,29,Vladivostok,62000,Marketing,"relocated, remote"
+11,Karl Müller,38,Moscow,99000,Engineering,umlaut
+12,Laura Martinez,27,SPb,58000,HR,
+13,Mike Chen,41,Novosibirsk,110000,Engineering,"lead, ""core"" team"
+14,Nina Kowalski,36,Kazan,82000,Finance,
+15,Oscar Reyes,24,Omsk,45000,Support,
+16,Пётр Сидоров,52,Yekaterinburg,130000,Engineering,
+17,Quinn Taylor,30,Sochi,72000,Sales,"top performer, Q3"
+18,Rachel Green,34,Moscow,91000,Marketing,
+19,Sam Patel,39,SPb,103000,Engineering,"wrote ""legacy"" code"
+20,Tina Turner,26,Vladivostok,54000,HR,
