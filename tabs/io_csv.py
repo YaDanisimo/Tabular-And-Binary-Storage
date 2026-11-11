@@ -57,6 +57,7 @@ def _save_csv(columns, rows, path, save_names, encoding, delimiter, newline):
             writer.writerow(columns)
         writer.writerows(rows)
 
+
 def save_table(table: Table, path="saved_test_files/test.csv", max_rows=None, save_names=True, delimiter=",", encoding="utf-8", newline=""):
     data = table.get_data()
 

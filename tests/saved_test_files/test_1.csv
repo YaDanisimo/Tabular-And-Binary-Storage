@@ -1,0 +1,11 @@
+id,name,age,city,salary,department,notes
+11,Karl Müller,38,Moscow,99000,Engineering,umlaut
+12,Laura Martinez,27,SPb,58000,HR,
+13,Mike Chen,41,Novosibirsk,110000,Engineering,"lead, ""core"" team"
+14,Nina Kowalski,36,Kazan,82000,Finance,
+15,Oscar Reyes,24,Omsk,45000,Support,
+16,Пётр Сидоров,52,Yekaterinburg,130000,Engineering,
+17,Quinn Taylor,30,Sochi,72000,Sales,"top performer, Q3"
+18,Rachel Green,34,Moscow,91000,Marketing,
+19,Sam Patel,39,SPb,103000,Engineering,"wrote ""legacy"" code"
+20,Tina Turner,26,Vladivostok,54000,HR,

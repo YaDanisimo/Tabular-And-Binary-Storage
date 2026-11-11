@@ -1,0 +1,11 @@
+id,name,age,city,salary,department,notes
+21,Uma Ivanova,44,Novosibirsk,118000,Finance,
+22,Victor Hugo,47,Kazan,140000,Engineering,
+23,Wendy Adams,32,Moscow,79000,Sales,
+24,Xavier Lopez,28,Omsk,61000,Support,
+25,Yara Haddad,35,Sochi,84000,Marketing,"bilingual, ar/en"
+26,Zack Miller,29,Yekaterinburg,67000,Engineering,
+27,Анна Смирнова,31,Moscow,86000,HR,
+28,Brian O'Neil,40,SPb,105000,Engineering,name has apostrophe
+29,Chloe Kim,23,Vladivostok,48000,Marketing,
+30,Daniel Craig,50,Novosibirsk,135000,Finance,"director, ""trusted"""
