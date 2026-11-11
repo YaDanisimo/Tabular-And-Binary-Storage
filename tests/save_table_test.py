@@ -12,4 +12,4 @@ table1 = tb.load_csv(test_data, header=True)
 tb.save_csv(table1, max_rows=10)
 
 table_short = tb.load_csv(test_0, header=True)
-print(*table_short.get_data(), sep="\n")
+table_short.print_table()
