@@ -5,7 +5,7 @@ import csv
 def _get_dictionary(path, header, delimiter, encoding, newline):
     with open(path, mode='r', encoding=encoding, newline=newline) as file:
         reader = csv.reader(file, delimiter=delimiter)
-        rows = list(reader)
+        rows = [row for row in reader if any(cell.strip() for cell in row)]
 
     if not rows:
         return {}
