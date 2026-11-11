@@ -7,11 +7,7 @@ table = [
     {"name": "Petya", "age": 13, "City": "NewYork"}
 ]
 
-def get_rows_by_number(table, start, stop, copy_table=True):
-    if not copy_table:
-        return table[start:stop]
 
-    return deepcopy(table[start:stop])
 
 table_new = get_rows_by_number(table, 0, 3, copy_table=True)
 

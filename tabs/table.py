@@ -1,11 +1,10 @@
+from copy import deepcopy
+
 
 class Table:
     def __init__(self, data):
-        self._columns = list(data)
-        self._data = {}
-
-        for col, rows in data.items():
-            self._data[col] = rows.copy()
+        self._columns = data[0].keys()
+        self._data = data
 
         self._types = {}
 
@@ -69,6 +68,12 @@ class Table:
 
             else:
                 return self._data[column][0]
+
+    def get_rows_by_number(self, start, stop, copy_table=True):
+        if not copy_table:
+            return self._data[start:stop]
+
+        return deepcopy(self._data[start:stop])
 
 
 
