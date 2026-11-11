@@ -67,7 +67,7 @@ def save_table(table: Table, path="saved_test_files/test.csv", max_rows=None, sa
         path = path[:-4]
 
     if max_rows is None:
-        _save_csv(data, path, save_names, encoding, delimiter, newline)
+        _save_csv(data, path, encoding, save_names, delimiter, newline)
     elif isinstance(max_rows, int) and max_rows > 0:
         left_border = 0
         right_border = max_rows

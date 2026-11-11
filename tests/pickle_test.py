@@ -11,9 +11,9 @@ test_0 = ROOT / "tests" / "saved_test_files" / "test_0.csv"
 
 table1 = tb.load_csv(test_data, header=True)
 
-tb.save_pickle(table1, "test.pkl")
-table2 = tb.load_pickle("test.pkl")
+tb.save_pickle(table1, "pickle_file_tests/test.pkl", max_rows=20)
+table2 = tb.load_pickle("pickle_file_tests/test_2.pkl")
 table2.print_table()
 
-
+#tb.save_pickle(table1, "test.pkl", max_rows=20)
 
