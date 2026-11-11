@@ -1,6 +1,7 @@
 from copy import deepcopy
 
-table = [
+columns = {}
+data = [
     {"name": "Alex", "age": 23, "City": "Moscow"},
     {"name": "Pidr", "age": 18, "City": "Kiev"},
     {"name": "Misha", "age": 3, "City": "Minsk"},

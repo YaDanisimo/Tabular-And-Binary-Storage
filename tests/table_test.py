@@ -9,3 +9,4 @@ dota_data = ROOT / "datasets" / "dota_data.csv"
 table = tb.load_csv(null_data)
 table.print_table()
 print(table.get_value('age'))
+data[0].keys()
