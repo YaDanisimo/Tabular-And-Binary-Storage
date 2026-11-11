@@ -75,7 +75,7 @@ def save_table(table: Table, path="saved_test_files/test.csv", max_rows=None, sa
         file_prefix = 0
         while left_border < data_size:
             chunked_rows = data[left_border:right_border]
-            _save_csv(chunked_rows, path + f"_{file_prefix}.csv", save_names, encoding, delimiter, newline)
+            _save_csv(chunked_rows, path + f"_{file_prefix}.csv", encoding, save_names, delimiter, newline)
 
             left_border += max_rows
             right_border = min(right_border + max_rows, data_size)

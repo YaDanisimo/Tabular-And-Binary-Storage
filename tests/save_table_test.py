@@ -9,7 +9,23 @@ test_0 = ROOT / "tests" / "saved_test_files" / "test_0.csv"
 
 print(test_data)
 table1 = tb.load_csv(test_data, header=True)
-tb.save_csv(table1, max_rows=10)
+tb.save_csv(table1, max_rows=10, save_names=True)
 
 table_short = tb.load_csv(test_0, header=True)
+table_short.print_table()
+
+print()
+
+table1 = tb.load_csv(test_data, header=True)
+tb.save_csv(table1, max_rows=10, save_names=False)
+
+table_short = tb.load_csv(test_0, header=True)
+table_short.print_table()
+
+print()
+
+table1 = tb.load_csv(test_data, header=True)
+tb.save_csv(table1, max_rows=10, save_names=False)
+
+table_short = tb.load_csv(test_0, header=None)
 table_short.print_table()

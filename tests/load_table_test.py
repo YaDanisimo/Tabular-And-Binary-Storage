@@ -25,6 +25,6 @@ a = tb.load_csv()
 print(a)
 print("===========================================\n")
 b = tb.load_csv(null_data)
-print(b.get_data())
+
 
 
