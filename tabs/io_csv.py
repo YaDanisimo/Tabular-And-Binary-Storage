@@ -11,6 +11,11 @@ def _get_dictionary(path, header, delimiter, encoding, newline):
         return {}
 
     if isinstance(header, (list, tuple)):
+        if len(header) != len(rows[0]):
+            raise ValueError("не совпадает количечетсво столбцов. Доделать")
+        for name in header:
+            if not isinstance(name, str):
+                raise TypeError(f"недопустимый тип данных для столбца: {type(name)}")
         column_names = list(header)
     elif header is True:
         column_names = rows[0]
@@ -53,24 +58,26 @@ def _save_csv(columns, rows, path, save_names, encoding, delimiter, newline):
         writer.writerows(rows)
 
 def save_table(table: Table, path="saved_test_files/test.csv", max_rows=None, save_names=True, delimiter=",", encoding="utf-8", newline=""):
-    data = table._data # table.get_data()
+    data = table.get_data()
+
+    if path[-4:] == ".csv":
+        path = path[:-4]
 
     columns = data.keys()
     rows = list(zip(*data.values()))
     if max_rows is None:
         _save_csv(columns, rows, path, save_names, encoding, delimiter, newline)
-    elif max_rows > 0:
+    elif isinstance(max_rows, int) and max_rows > 0:
         left_border = 0
         right_border = max_rows
         rows_len = len(rows)
         file_prefix = 0
         while left_border < rows_len:
-            chunked_rows = rows[left_border:min(right_border, len(rows))]
-            _save_csv(columns, chunked_rows, path + f"_{file_prefix}", save_names, encoding, delimiter, newline)
+            chunked_rows = rows[left_border:right_border]
+            _save_csv(columns, chunked_rows, path + f"_{file_prefix}.csv", save_names, encoding, delimiter, newline)
 
             left_border += max_rows
             right_border = min(right_border + max_rows, rows_len)
             file_prefix += 1
     else:
         raise ValueError("max_rows говно. ДОДЕЛАТЬ")
-
