@@ -51,3 +51,54 @@ class Table:
 
     def get_data(self):
         return self._data
+
+    def set_value(self, column, value):
+        column = self._resolve_column(column)
+
+        if len(self._data[column]) != 1:
+            raise ValueError('Ожидался одна строка!')
+
+        else:
+            self._data[column] = [value]
+
+    def get_value(self, column):
+            column = self._resolve_column(column)
+
+            if len(self._data[column]) != 1:
+                raise ValueError('Ожидался одна строка!')
+
+            else:
+                return self._data[column][0]
+
+
+
+    def print_table(self):
+        columns = list(self._data.keys())
+        n_rows = len(self._data[columns[0]])
+
+        str_headers = [str(c) for c in columns]
+        str_rows = [[str(self._data[c][i]) for c in columns] for i in range(n_rows)]
+
+        numeric = [
+            all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in self._data[c])
+            for c in columns
+        ]
+
+        widths = [
+            max([len(h)] + [len(r[i]) for r in str_rows])
+            for i, h in enumerate(str_headers)
+        ]
+
+        idx_width = len(str(n_rows - 1))
+        sep = "  "
+
+        print(" " * idx_width + sep + sep.join(
+            (h.rjust(w) if nr else h.ljust(w))
+            for h, w, nr in zip(str_headers, widths, numeric)
+        ).rstrip())
+
+        for i, row in enumerate(str_rows):
+            print((str(i).rjust(idx_width) + sep + sep.join(
+                (c.rjust(w) if nr else c.ljust(w))
+                for c, w, nr in zip(row, widths, numeric)
+            )).rstrip())
