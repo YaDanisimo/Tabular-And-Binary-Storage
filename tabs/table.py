@@ -48,3 +48,6 @@ class Table:
             col_type, values = col_converted
             self._data[col][:] = values
             self._types[col] = col_type
+
+    def get_data(self):
+        return self._data
