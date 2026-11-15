@@ -3,13 +3,14 @@ from copy import deepcopy
 
 class Table:
     def __init__(self, data):
-        self._columns = data[0].keys()
+        self._columns = list(data[0])
         self._data = data
 
         self._types = {}
 
-        for cols in self._columns:
-            self._types[cols] = str
+        for col in self._columns:
+            self._types[col] = str
+
 
     def _resolve_column(self, column):
         if isinstance(column, int):
@@ -17,26 +18,36 @@ class Table:
         else:
             return column
 
+
     def get_values(self, column):
         column = self._resolve_column(column)
-        return self._data[column].copy()
+        values = []
+
+        for row in self._data:
+            values.append(row[column])
+
+        return values
+
 
     def set_values(self, column, values):
         column = self._resolve_column(column)
-        if len(values) != len(self._data[column]):
+
+        if len(values) != len(self._data):
             raise ValueError('Количество новых значений не равно количеству строк!')
-        else:
-            self._data[column][:] = values
+        for row, value in zip(self._data, values):
+                row[column] = value
+
 
     def get_column_types(self):
         return self._types.copy()
+
 
     def set_column_types(self, column_types):
         converted_columns = {}
 
         for col, col_type in column_types.items():
             col = self._resolve_column(col)
-            values = self._data[col]
+            values = self.get_values(col)
             converted_values = []
 
             for value in values:
@@ -45,65 +56,105 @@ class Table:
 
         for col, col_converted in converted_columns.items():
             col_type, values = col_converted
-            self._data[col][:] = values
+            self.set_values(col, values)
             self._types[col] = col_type
+
 
     def get_data(self):
         return self._data
 
+
     def set_value(self, column, value):
         column = self._resolve_column(column)
 
-        if len(self._data[column]) != 1:
+        if len(self._data) != 1:
             raise ValueError('Ожидался одна строка!')
 
-        else:
-            self._data[column] = [value]
+        self._data[0][column] = value
+
 
     def get_value(self, column):
-            column = self._resolve_column(column)
+        column = self._resolve_column(column)
 
-            if len(self._data[column]) != 1:
-                raise ValueError('Ожидался одна строка!')
+        if len(self._data) != 1:
+            raise ValueError('Ожидался одна строка!')
 
-            else:
-                return self._data[column][0]
+        return self._data[0][column]
 
-    def get_rows_by_number(self, start, stop, copy_table=True):
-        if not copy_table:
-            return self._data[start:stop]
 
-        return deepcopy(self._data[start:stop])
+    def get_rows_by_number(self, start, stop=None, copy_table=False):
+        if stop is None:
+            stop = start + 1
 
+        selected = self._data[start:stop]
+
+        if copy_table:
+            selected = deepcopy(selected)
+
+        return Table(selected)
+
+
+    def get_rows_by_index(self, *values, copy_table=False):
+        index_column = self._columns[0]
+        rows = []
+
+        for row in self._data:
+            if row[index_column] in values:
+                rows.append(row)
+
+        if copy_table:
+            rows = deepcopy(rows)
+
+        return Table(rows)
 
 
     def print_table(self):
-        columns = list(self._data.keys())
-        n_rows = len(self._data[columns[0]])
+        columns = self._columns
+        n_rows = len(self._data)
 
-        str_headers = [str(c) for c in columns]
-        str_rows = [[str(self._data[c][i]) for c in columns] for i in range(n_rows)]
+        if not columns:
+            print("Таблица не содержит столбцов.")
+            return
+
+        headers = [str(col) for col in columns]
+        rows = [
+            [str(row[col]) for col in columns]
+            for row in self._data
+        ]
 
         numeric = [
-            all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in self._data[c])
-            for c in columns
+            n_rows > 0 and all(
+                isinstance(row[col], (int, float))
+                and not isinstance(row[col], bool)
+                for row in self._data
+            )
+            for col in columns
         ]
 
-        widths = [
-            max([len(h)] + [len(r[i]) for r in str_rows])
-            for i, h in enumerate(str_headers)
-        ]
+        widths = []
 
-        idx_width = len(str(n_rows - 1))
+        for i, header in enumerate(headers):
+            width = len(header)
+
+            for row in rows:
+                width = max(width, len(row[i]))
+
+            widths.append(width)
+
+        index_width = max(1, len(str(n_rows - 1)))
         sep = "  "
 
-        print(" " * idx_width + sep + sep.join(
-            (h.rjust(w) if nr else h.ljust(w))
-            for h, w, nr in zip(str_headers, widths, numeric)
-        ).rstrip())
+        header_line = sep.join(
+            header.rjust(width) if is_numeric else header.ljust(width)
+            for header, width, is_numeric in zip(headers, widths, numeric)
+        )
 
-        for i, row in enumerate(str_rows):
-            print((str(i).rjust(idx_width) + sep + sep.join(
-                (c.rjust(w) if nr else c.ljust(w))
-                for c, w, nr in zip(row, widths, numeric)
-            )).rstrip())
+        print(" " * index_width + sep + header_line.rstrip())
+
+        for i, row in enumerate(rows):
+            formatted_row = sep.join(
+                value.rjust(width) if is_numeric else value.ljust(width)
+                for value, width, is_numeric in zip(row, widths, numeric)
+            )
+
+            print(str(i).rjust(index_width) + sep + formatted_row.rstrip())
