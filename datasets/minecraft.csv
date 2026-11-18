@@ -1,0 +1,21 @@
+session_id,last_dimension,tool_after_switch,blocks_mined,session_status
+1,Overworld,Diamond Pickaxe,842,Completed
+2,Nether,Netherite Axe,,Died
+3,End,Diamond Sword,315,Completed
+4,Overworld,,120,Incomplete
+5,Nether,Diamond Pickaxe,667,Completed
+6,End,Elytra,,Died
+7,Overworld,Netherite Shovel,934,Completed
+8,Nether,Diamond Sword,,Incomplete
+9,End,Netherite Pickaxe,428,Completed
+10,Overworld,Bow,,Died
+11,Nether,Netherite Axe,755,Completed
+12,End,Diamond Pickaxe,,Incomplete
+13,Overworld,Trident,289,Completed
+14,Nether,,512,Died
+15,End,Netherite Sword,601,Completed
+16,Overworld,Diamond Axe,,Incomplete
+17,Nether,Crossbow,873,Completed
+18,End,,240,Died
+19,Overworld,Netherite Pickaxe,998,Completed
+20,Nether,Diamond Shovel,,Incomplete

@@ -2,11 +2,12 @@ from copy import deepcopy
 
 
 class Table:
-    def __init__(self, data):
+    def __init__(self, data, types):
         self._columns = list(data[0])
         self._data = data
 
-        self._types = {}
+
+        self._types = types
 
         for col in self._columns:
             self._types[col] = str

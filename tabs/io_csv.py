@@ -1,4 +1,5 @@
 from .table import Table
+from .infer import infer_types
 import csv
 
 # преобразует csv в словарь
@@ -29,13 +30,13 @@ def _get_dictionary(path, header, delimiter, encoding, newline):
     data = []
     for row in rows:
         data.append({})
-        for idx, value in enumerate(row):
-            data[-1][column_names[idx]] = value
+        for column, value in enumerate(row):
+            data[-1][column_names[column]] = value if value != "" else None
 
     return data
 
 # создаёт таблицы из словарей, созданных в get_dictionary
-def load_table(*paths, header=True, encoding="utf-8", delimiter=",", newline=""):
+def load_table(*paths, header=True, encoding="utf-8", delimiter=",", newline="", auto_types=True):
     if not paths:
         return None
 
@@ -47,7 +48,13 @@ def load_table(*paths, header=True, encoding="utf-8", delimiter=",", newline="")
             encoding=encoding, newline=newline
         )
 
-        tables.append(Table(data))
+        column_types = {}
+        if auto_types:
+            column_types = infer_types(data)
+        elif len(data) < 0:
+            column_types = {column: object for column in data[0].keys()}
+
+        tables.append(Table(data, column_types))
 
     return tables[0] if len(tables) == 1 else tables
 
