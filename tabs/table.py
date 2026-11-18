@@ -6,11 +6,7 @@ class Table:
         self._columns = list(data[0])
         self._data = data
 
-
         self._types = types
-
-        for col in self._columns:
-            self._types[col] = str
 
 
     def _resolve_column(self, column):

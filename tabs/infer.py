@@ -92,21 +92,9 @@ def infer_types(data):
             current_type = _merge_column_types(current_type, cell_type)
 
         column_types[column_name] = current_type if current_type is not type(None) else object
-
     for record in data:
         for column_name in headers:
             record[column_name] = _cast_value(record[column_name], column_types[column_name])
 
     return column_types
 
-
-# ----------------- ТЕСТ -----------------
-if __name__ == "__main__":
-    dataset = [
-        {"id": "1", "price": "1.5", "is_active": "True", "name": "hello", "comment": None},
-        {"id": "2", "price": "2", "is_active": "False", "name": "world", "comment": None},
-        {"id": "-3", "price": "3.14", "is_active": "true", "name": "!", "comment": None},
-        {"id": "4", "price": None, "is_active": "false", "name": "test", "comment": "ok"},
-    ]
-
-    print(infer_types(dataset))

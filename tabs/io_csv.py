@@ -51,6 +51,7 @@ def load_table(*paths, header=True, encoding="utf-8", delimiter=",", newline="",
         column_types = {}
         if auto_types:
             column_types = infer_types(data)
+
         elif len(data) < 0:
             column_types = {column: object for column in data[0].keys()}
 
