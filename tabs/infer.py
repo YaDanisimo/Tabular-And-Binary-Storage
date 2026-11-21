@@ -1,100 +1,83 @@
+from datetime import datetime
 import re
+
 
 INT_PATTERN = re.compile(r"^\s*[+-]?\d+\s*$")
 FLOAT_PATTERN = re.compile(r"^\s*[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?\s*$")
-BOOL_MAP = {"true": True, "false": False}
+bool_map = {"true": True, "false": False}
 
+def _is_float(value):
+    return bool(FLOAT_PATTERN.match(value))
 
-def _is_integer(text: str) -> bool:
-    return bool(INT_PATTERN.match(text))
+def _is_int(value):
+    return bool(INT_PATTERN.match(value))
 
-
-def _is_floating(text: str) -> bool:
-    return bool(FLOAT_PATTERN.match(text))
-
-
-def _detect_cell_type(cell_value):
-    if cell_value is None:
-        return type(None)
-    if isinstance(cell_value, bool):
-        return bool
-    if isinstance(cell_value, int):
-        return int
-    if isinstance(cell_value, float):
-        return float
-    if isinstance(cell_value, str):
-        stripped_text = cell_value
-        if stripped_text.lower() in BOOL_MAP:
-            return bool
-        if _is_integer(stripped_text):
-            return int
-        if _is_floating(stripped_text):
-            return float
-        return str
-    return object
-
-
-def _merge_column_types(detected_type, new_type):
-    if detected_type is None:
-        return new_type
-    if new_type is None:
-        return detected_type
-
-    if detected_type is object or new_type is object:
-        return object
-    if detected_type is type(None) or new_type is type(None):
-        return object
-
-    if detected_type is new_type:
-        return detected_type
-
-    if {detected_type, new_type} == {int, float}:
-        return float
-
-    return object
-
-
-def _cast_value(raw_value, target_type):
-    if raw_value is None:
+def _get_cell_type(value):
+    if value is None:
         return None
 
-    if target_type is object:
-        return raw_value if isinstance(raw_value, str) else raw_value
+    if isinstance(value, datetime):
+        return datetime
 
-    if target_type is bool:
-        if isinstance(raw_value, bool):
-            return raw_value
-        if isinstance(raw_value, str):
-            return BOOL_MAP[raw_value.lower()]
-        return bool(raw_value)
+    if isinstance(value, bool):
+        return bool
 
-    if target_type is str:
-        return str(raw_value)
+    if isinstance(value, int):
+        return int
 
-    # Для int и float
-    if isinstance(raw_value, str):
-        raw_value = raw_value
+    if isinstance(value, float):
+        return float
 
-    return target_type(raw_value)
+    if not isinstance(value, str):
+        raise TypeError(f"Недопустимый тип данных: {type(value)}")
+
+    if _is_int(value):
+        return int
+
+    if _is_float(value):
+        return float
+
+    if value.lower() in bool_map:
+        return bool
+
+    return str
+
+def _merge_types(types):
+    if str in types or datetime in types:
+        raise TypeError(f"Несочетаемые типы данных: {types}")
+
+    if float in types:
+        return float
+
+    if int in types:
+        return int
+
+    raise ValueError(f"в {types} содержится недопустимый тип данных")
 
 
-def infer_types(data):
-    if not data:
-        return {}
+def infer_column_types(columns: list, rows: list) -> dict:
+    if not columns:
+        raise ValueError("Отсутствуют названия столбцов")
 
-    headers = list(data[0].keys())
-    column_types = {}
+    types = {column: str for column in columns}
 
-    for column_name in headers:
-        current_type = None
-        for record in data:
-            cell_type = _detect_cell_type(record[column_name])
-            current_type = _merge_column_types(current_type, cell_type)
+    n_cols = len(columns)
+    for idx, row in enumerate(rows, start=1):
+        if len(row) != n_cols:
+            raise ValueError(
+                f"в {idx} строке {len(row)} полей вместо {n_cols}"
+            )
 
-        column_types[column_name] = current_type if current_type is not type(None) else object
-    for record in data:
-        for column_name in headers:
-            record[column_name] = _cast_value(record[column_name], column_types[column_name])
+    for column_index in range(n_cols):
+        column_types = set()
+        for row in rows:
+            cell_type = _get_cell_type(row[column_index])
+            if cell_type is not None:
+                column_types.add(cell_type)
 
-    return column_types
+        if len(column_types) == 1:
+            types[columns[column_index]] = next(iter(column_types))
+        elif len(column_types) > 1:
+            types[columns[column_index]] = _merge_types(column_types)
 
+    return types

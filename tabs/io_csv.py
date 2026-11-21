@@ -1,92 +1,152 @@
 from .table import Table
-from .infer import infer_types
+from .infer import infer_column_types
+from pathlib import Path
 import csv
 
-# преобразует csv в словарь
-def _get_dictionary(path, header, delimiter, encoding, newline):
+
+def _get_table_data(path, headers, delimiter, encoding, newline):
+    path = Path(path)
+    if not path.is_file():
+        raise FileNotFoundError(f"Файл не найден: {path}")
+
     with open(path, mode='r', encoding=encoding, newline=newline) as file:
-        reader = csv.reader(file, delimiter=delimiter)
-        rows = [row for row in reader if any(cell.strip() for cell in row)]
+        rows = list(csv.reader(file, delimiter=delimiter))
 
     if not rows:
-        return {}
+        return None, []
 
-    len_rows = len(rows[0])
-    if isinstance(header, (list, tuple)):
-        if len(header) != len_rows:
-            raise ValueError("не совпадает количечетсво столбцов. Доделать")
-        for name in header:
-            if not isinstance(name, str):
-                raise TypeError(f"недопустимый тип данных для столбца: {type(name)}")
-        column_names = list(header)
-    elif header is True:
-        column_names = rows[0]
-        rows = rows[1:]
-    elif header is None:
-        column_names = list(range(len_rows))
+    n_cols = len(rows[0])
+
+    if isinstance(headers, (list, tuple)):
+        if len(headers) != n_cols:
+            raise ValueError(
+                f"{path}: длина header ({len(headers)}) "
+                f"не совпадает с числом столбцов в файле ({n_cols})"
+            )
+
+        if not all(isinstance(name, str) for name in headers):
+            raise TypeError(
+                f"{path}: все имена столбцов в headers должны быть str"
+            )
+
+        column_names = list(headers)
+        data_rows = rows
+
+    elif headers is True:
+        column_names = list(rows[0])
+        data_rows = rows[1:]
+
+    elif headers is None:
+        column_names = list(range(n_cols))
+        data_rows = rows
+
     else:
-        raise ValueError("header must be list or tuple or None or True")
-
-    data = []
-    for row in rows:
-        data.append({})
-        for column, value in enumerate(row):
-            data[-1][column_names[column]] = value if value != "" else None
-
-    return data
-
-# создаёт таблицы из словарей, созданных в get_dictionary
-def load_table(*paths, header=True, encoding="utf-8", delimiter=",", newline="", auto_types=True):
-    if not paths:
-        return None
-
-    tables = []
-
-    for path in paths:
-        data = _get_dictionary(
-            path, header=header, delimiter=delimiter,
-            encoding=encoding, newline=newline
+        raise ValueError(
+            f"header должен быть только True, None или list/tuple[str]\n"
+            f"получено {type(headers).__name__}"
         )
 
-        column_types = {}
-        if auto_types:
-            column_types = infer_types(data)
+    offset = 2 if headers is True else 1
+    data = []
+    for idx, row in enumerate(data_rows, start=offset):
+        if len(row) != n_cols:
+            raise ValueError(
+                f"{path}, строка {idx}: {len(row)} полей вместо {n_cols}"
+            )
 
-        elif len(data) < 0:
-            column_types = {column: object for column in data[0].keys()}
+        data.append([value if value != "" else None for value in row])
 
-        tables.append(Table(data, column_types))
+    return column_names, data
 
-    return tables[0] if len(tables) == 1 else tables
+# создаёт таблицы из словарей, созданных в get_dictionary
+def load_table(*paths, headers=True, encoding="utf-8", delimiter=",",
+               newline="", auto_types=True):
+    if not paths:
+        raise ValueError("Не передан ни один путь к файлу")
+
+    if len(delimiter) != 1:
+        raise ValueError(f"delimiter должен быть одним символом, получено {delimiter}")
+
+    common_columns = None
+    all_data = []
+
+    for path in paths:
+        columns, data = _get_table_data(
+            path, headers=headers, delimiter=delimiter,
+            encoding=encoding, newline=newline,
+        )
+
+        if columns is None:
+            raise ValueError(f"Файл пуст: {path}")
+
+        if common_columns is None:
+            common_columns = columns
+        elif columns != common_columns:
+            raise ValueError(
+                f"Структура столбцов в {path} не совпадает с первым файлом:\n"
+                f"    ожидалось: {common_columns}\n"
+                f"    получено:  {columns}"
+            )
+
+        all_data.extend(data)
+
+    if not all_data:
+        raise ValueError(
+            f"Таблица пуста (0 строк данных). Файлы: {paths}"
+        )
+
+    types = (
+        infer_column_types(common_columns, all_data) if auto_types
+        else {column: str for column in common_columns}
+    )
+
+    return Table(common_columns, all_data, types)
 
 
-def _save_csv(rows, path, encoding, save_names, delimiter, newline):
+def _save_csv(rows, path, encoding, headers, delimiter, newline):
+    path.parent.mkdir(parents=True, exist_ok=True)
+
     with open(path, mode="w", encoding=encoding, newline=newline) as file:
-        writer = csv.DictWriter(file, fieldnames=list(rows[0]), delimiter=delimiter)
-        if save_names:
-            writer.writeheader()
+        writer = csv.writer(file, delimiter=delimiter)
+
+        if headers is not None:
+            writer.writerow(headers)
         writer.writerows(rows)
 
 
-def save_table(table: Table, path="saved_test_files/test.csv", max_rows=None, save_names=True, delimiter=",", encoding="utf-8", newline=""):
-    data = table.get_data()
+def save_table(table: Table, name: str = "test", path: str ="saved_test_files/", max_rows=None,
+               save_headers=True, delimiter=",", encoding="utf-8", newline=""):
+    if not isinstance(table, Table):
+        raise TypeError(f"Ожидалась Table, получено {type(table)}")
 
-    if path[-4:] == ".csv":
-        path = path[:-4]
+    if len(delimiter) != 1:
+        raise ValueError(f"delimiter должен быть одним символом, получено {delimiter}")
+
+    headers = table.columns if save_headers else None
+    data = table.data
+
+    base = Path(path) / name
 
     if max_rows is None:
-        _save_csv(data, path, encoding, save_names, delimiter, newline)
-    elif isinstance(max_rows, int) and max_rows > 0:
+        current_path = base.with_suffix(".csv")
+        _save_csv(data, current_path, encoding, headers, delimiter, newline)
+
+    elif isinstance(max_rows, int) and not isinstance(max_rows, bool) and max_rows > 0:
         left_border = 0
         right_border = max_rows
         data_size = len(data)
+
         file_prefix = 0
         while left_border < data_size:
             chunked_rows = data[left_border:right_border]
-            _save_csv(chunked_rows, path + f"_{file_prefix}.csv", encoding, save_names, delimiter, newline)
+
+            current_path = base.with_name(f"{base.name}_{file_prefix}.csv")
+
+            _save_csv(chunked_rows, current_path, encoding, headers, delimiter, newline)
 
             left_border += max_rows
             right_border = min(right_border + max_rows, data_size)
             file_prefix += 1
+
     else:
-        raise ValueError("max_rows говно. ДОДЕЛАТЬ")
+        raise ValueError(f"max_rows должен быть положительным int или None, получено {max_rows}")

@@ -1,19 +1,61 @@
 from copy import deepcopy
-
+from tabs.infer import infer_column_types
 
 class Table:
-    def __init__(self, data, types):
-        self._columns = list(data[0])
-        self._data = data
+    """
+    _columns - список столбцов
+    _data - список строк
+    _types - словарь {столбец: тип}
+    """
 
-        self._types = types
+    def __init__(self, columns, data, types=None):
+        # обработать ошибки
+        self._columns = list(columns)
+        self._data = list(data)
 
+        if types is None:
+            self._types = {col: str for col in self._columns}
+        else:
+            self._types = types
+
+    """ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ"""
 
     def _resolve_column(self, column):
         if isinstance(column, int):
             return self._columns[column]
         else:
             return column
+
+    def _column_index(self, column):
+        """Возвращает индекс столбца по имени или индексу апхахппх"""
+        name = self._resolve_column(column)
+        return self._columns.index(name)
+
+
+    """ДЛЯ ОТЛАДКИ / ФИЧИ"""
+
+    @property
+    def columns(self):
+        return list(self._columns)
+
+    @property
+    def types(self):
+        return dict(self._types) # так создаётся копия
+
+    @property
+    def data(self):
+        return deepcopy(self._data)
+
+    def __len__(self):
+        return len(self._data)
+
+    """ДЛЯ ПОЛУЧЕНИЯ ДАННЫХ""" # get функции
+
+
+
+    """ДЛЯ ИЗМЕНЕНИЯ ДАННЫХ""" # set функции
+
+
 
 
     def get_values(self, column):
@@ -34,11 +76,6 @@ class Table:
         for row, value in zip(self._data, values):
                 row[column] = value
 
-
-    def get_column_types(self):
-        return self._types.copy()
-
-
     def set_column_types(self, column_types):
         converted_columns = {}
 
@@ -56,9 +93,6 @@ class Table:
             self.set_values(col, values)
             self._types[col] = col_type
 
-
-    def get_data(self):
-        return self._data
 
 
     def set_value(self, column, value):
@@ -99,43 +133,53 @@ class Table:
             if row[index_column] in values:
                 rows.append(row)
 
+        column_types = self._types # берём типы
         if copy_table:
             rows = deepcopy(rows)
+            column_types = deepcopy(self._types)
+
+        if len(rows) == 0:
+            raise ValueError("Пустая таблица")
+
+        rows.append(column_types) # добавляем в конец
+
 
         return Table(rows)
 
+    """ВЫВОД ТАБЛИЦЫ"""
 
     def print_table(self):
-        columns = self._columns
-        n_rows = len(self._data)
+        columns = self._columns  # list
+        n_rows = len(self._data)  # list[list]
+        n_cols = len(columns)
 
         if not columns:
             print("Таблица не содержит столбцов.")
             return
 
         headers = [str(col) for col in columns]
+
+        # _data — список списков, поэтому приводим значения по индексу
         rows = [
-            [str(row[col]) for col in columns]
+            [str(value) for value in row]
             for row in self._data
         ]
 
+        # проверка "числовости" столбца по индексу i
         numeric = [
             n_rows > 0 and all(
-                isinstance(row[col], (int, float))
-                and not isinstance(row[col], bool)
+                isinstance(row[i], (int, float))
+                and not isinstance(row[i], bool)
                 for row in self._data
             )
-            for col in columns
+            for i in range(n_cols)
         ]
 
         widths = []
-
         for i, header in enumerate(headers):
             width = len(header)
-
             for row in rows:
                 width = max(width, len(row[i]))
-
             widths.append(width)
 
         index_width = max(1, len(str(n_rows - 1)))
@@ -153,5 +197,7 @@ class Table:
                 value.rjust(width) if is_numeric else value.ljust(width)
                 for value, width, is_numeric in zip(row, widths, numeric)
             )
-
             print(str(i).rjust(index_width) + sep + formatted_row.rstrip())
+
+    def __repr__(self):
+        return f"Table(columns={self._columns}, rows={len(self._data)}"

@@ -7,6 +7,10 @@ __pycache__/
 # C extensions
 *.so
 
+# ------------
+test/saved_test_files
+test/pickle_file_tests
+# ------------
 # Distribution / packaging
 .Python
 build/

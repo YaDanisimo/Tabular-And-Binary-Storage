@@ -10,7 +10,7 @@ table = tb.load_csv(test_data)
 table = tb.load_csv(test_data)
 
 selected = table.get_rows_by_index("2", "5", "10")
-
+selected.print_table()
 print(selected.get_values("id"))
 print(selected.get_values("name"))
 table = tb.load_csv(test_data)

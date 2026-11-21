@@ -7,25 +7,31 @@ null_data = ROOT / "datasets" / "null.csv"
 dota_data = ROOT / "datasets" / "dota_data.csv"
 test_0 = ROOT / "tests" / "saved_test_files" / "test_0.csv"
 
-print(test_data)
-table1 = tb.load_csv(test_data, header=True)
-tb.save_csv(table1, max_rows=10, save_names=True)
 
-table_short = tb.load_csv(test_0, header=True)
+table1 = tb.load_csv(test_data, headers=True)
+tb.save_csv(table1, max_rows=10, save_headers=True)
+
+table_short = tb.load_csv(test_0, headers=True)
 table_short.print_table()
 
-print()
+print("\nFIRST NICE\n")
 
-table1 = tb.load_csv(test_data, header=True)
-tb.save_csv(table1, max_rows=10, save_names=False)
+table1 = tb.load_csv(test_data, headers=True)
+tb.save_csv(table1, max_rows=10, save_headers=False)
 
-table_short = tb.load_csv(test_0, header=True)
+table_short = tb.load_csv(test_0, headers=True)
 table_short.print_table()
 
-print()
+print("\nSECOND NICE\n")
 
-table1 = tb.load_csv(test_data, header=True)
-tb.save_csv(table1, max_rows=10, save_names=False)
+#
+table1 = tb.load_csv(test_data, headers=True)
+tb.save_csv(table1, max_rows=25, save_headers=False)
 
-table_short = tb.load_csv(test_0, header=None)
+print("\nTHIRD NICE\n")
+
+
+table_short = tb.load_csv(test_0, headers=None)
 table_short.print_table()
+
+print("\nFOURTH NICE\n")
