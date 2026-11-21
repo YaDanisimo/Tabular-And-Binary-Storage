@@ -2,8 +2,8 @@ from datetime import datetime
 import re
 
 
-INT_PATTERN = re.compile(r"^\s*[-]?\d+\s*$")
-FLOAT_PATTERN = re.compile(r"^\s*[-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?\s*$")
+INT_PATTERN = re.compile(r"^\s*-?\d+\s*$")
+FLOAT_PATTERN = re.compile(r"^\s*-?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?\s*$")
 bool_map = {"true": True, "false": False}
 
 def _is_float(value):
