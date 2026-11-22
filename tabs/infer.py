@@ -16,6 +16,14 @@ DATETIME_FORMATS = [
     "%d-%m-%y %H:%M:%S",
     "%d-%m-%y %H:%M",
     "%d-%m-%y",
+
+    "%d.%m.%Y %H:%M:%S.%f",
+    "%d.%m.%Y %H:%M:%S",
+    "%d.%m.%Y %H:%M",
+    "%d.%m.%Y",
+    "%d.%m.%y %H:%M:%S",
+    "%d.%m.%y %H:%M",
+    "%d.%m.%y",
 ]
 bool_map = {"true": True, "false": False}
 
