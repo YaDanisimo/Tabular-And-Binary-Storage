@@ -9,5 +9,5 @@ mine_data = ROOT / "datasets" / "minecraft.csv"
 
 table1 = tb.load_csv(mine_data)
 table1.print_table()
-
+print(table1.data)
 print(table1.get_column_types())

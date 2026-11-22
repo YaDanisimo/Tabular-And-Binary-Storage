@@ -29,3 +29,17 @@ print(next(b)) # 3
 
 st = {1, 3}
 print(bool(st - {3, 1}))
+
+lst = [1, 2, 3]
+a = lst[1:2]
+print(a)
+a[0] = 53
+
+print(lst)
+
+lst1 = [1, 2, 3, 4]
+lst2 = lst1
+lst2[1] = 32
+print(lst1)
+
+print(str(True))
