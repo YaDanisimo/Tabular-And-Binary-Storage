@@ -1,4 +1,5 @@
 from copy import deepcopy
+from datetime import datetime
 from tabs.infer import infer_column_types
 
 class Table:
@@ -8,15 +9,14 @@ class Table:
     _types - словарь {столбец: тип}
     """
 
-    def __init__(self, columns, data, types=None):
-        # обработать ошибки
+    def __init__(self, columns: list[str], data: list[list], types: dict = None):
         self._columns = list(columns)
         self._data = list(data)
 
         if types is None:
             self._types = {col: str for col in self._columns}
         else:
-            self._types = types
+            self._types = dict(types)
 
     """ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ"""
 

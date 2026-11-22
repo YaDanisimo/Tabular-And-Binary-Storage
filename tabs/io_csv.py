@@ -37,7 +37,7 @@ def _get_table_data(path, headers, delimiter, encoding, newline):
         data_rows = rows[1:]
 
     elif headers is None:
-        column_names = list(range(n_cols))
+        column_names = [str(name) for name in range(n_cols)]
         data_rows = rows
 
     else:
@@ -81,6 +81,7 @@ def load_table(*paths, headers=True, encoding="utf-8", delimiter=",",
 
         if common_columns is None:
             common_columns = columns
+
         elif columns != common_columns:
             raise ValueError(
                 f"Структура столбцов в {path} не совпадает с первым файлом:\n"
@@ -114,7 +115,7 @@ def _save_csv(rows, path, encoding, headers, delimiter, newline):
         writer.writerows(rows)
 
 
-def save_table(table: Table, name: str = "test", path: str ="saved_test_files/", max_rows=None,
+def save_table(table: Table, name: str = "test", path: Path | str ="saved_test_files/", max_rows=None,
                save_headers=True, delimiter=",", encoding="utf-8", newline=""):
     if not isinstance(table, Table):
         raise TypeError(f"Ожидалась Table, получено {type(table)}")
