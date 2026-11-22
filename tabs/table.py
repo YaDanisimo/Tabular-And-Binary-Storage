@@ -51,21 +51,55 @@ class Table:
 
     """ДЛЯ ПОЛУЧЕНИЯ ДАННЫХ""" # get функции
 
-
-
-    """ДЛЯ ИЗМЕНЕНИЯ ДАННЫХ""" # set функции
-
-
-
-
     def get_values(self, column):
-        column = self._resolve_column(column)
+        column = self._column_index(column)
         values = []
 
         for row in self._data:
             values.append(row[column])
 
         return values
+
+    def get_value(self, column):
+
+        if len(self._data) != 1:
+            raise ValueError('Ожидалась одна строка!')
+
+        value =  self.get_values(column)
+
+        return value[0]
+
+    def get_rows_by_number(self, start, stop=None, copy_table=False):
+        if stop is None:
+            stop = start + 1
+
+        selected = self._data[start:stop]
+
+        if copy_table:
+            selected = deepcopy(selected)
+
+        return Table(self._columns, selected, types=self.types)
+
+
+    def get_rows_by_index(self, *values, copy_table=False):
+        index_column = 0
+        rows = []
+
+        for row in self._data:
+            if row[index_column] in values:
+                rows.append(row)
+
+        if copy_table:
+            rows = deepcopy(rows)
+
+        if len(rows) == 0:
+            raise ValueError("Пустая таблица!")
+
+        return Table(self._columns, rows, self._types)
+
+
+
+    """ДЛЯ ИЗМЕНЕНИЯ ДАННЫХ""" # set функции
 
 
     def set_values(self, column, values):
@@ -103,48 +137,6 @@ class Table:
 
         self._data[0][column] = value
 
-
-    def get_value(self, column):
-        column = self._resolve_column(column)
-
-        if len(self._data) != 1:
-            raise ValueError('Ожидался одна строка!')
-
-        return self._data[0][column]
-
-
-    def get_rows_by_number(self, start, stop=None, copy_table=False):
-        if stop is None:
-            stop = start + 1
-
-        selected = self._data[start:stop]
-
-        if copy_table:
-            selected = deepcopy(selected)
-
-        return Table(selected)
-
-
-    def get_rows_by_index(self, *values, copy_table=False):
-        index_column = self._columns[0]
-        rows = []
-
-        for row in self._data:
-            if row[index_column] in values:
-                rows.append(row)
-
-        column_types = self._types # берём типы
-        if copy_table:
-            rows = deepcopy(rows)
-            column_types = deepcopy(self._types)
-
-        if len(rows) == 0:
-            raise ValueError("Пустая таблица")
-
-        rows.append(column_types) # добавляем в конец
-
-
-        return Table(rows)
 
     """ВЫВОД ТАБЛИЦЫ"""
 
@@ -201,3 +193,4 @@ class Table:
 
     def __repr__(self):
         return f"Table(columns={self._columns}, rows={len(self._data)}"
+
