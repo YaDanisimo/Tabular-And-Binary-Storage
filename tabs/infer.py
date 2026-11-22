@@ -1,10 +1,41 @@
 from datetime import datetime
+from functools import lru_cache
 import re
 
 
 INT_PATTERN = re.compile(r"^\s*-?\d+\s*$")
 FLOAT_PATTERN = re.compile(r"^\s*-?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?\s*$")
+DATETIME_PRECHECK = re.compile(
+    r"^\s*\d{1,2}([.-])\d{1,2}\1(\d{2}|\d{4})( \d{1,2}:\d{2}(:\d{2}(\.\d{1,6})?)?)?\s*$"
+)
+DATETIME_FORMATS = [
+    "%d-%m-%Y %H:%M:%S.%f",
+    "%d-%m-%Y %H:%M:%S",
+    "%d-%m-%Y %H:%M",
+    "%d-%m-%Y",
+    "%d-%m-%y %H:%M:%S",
+    "%d-%m-%y %H:%M",
+    "%d-%m-%y",
+]
 bool_map = {"true": True, "false": False}
+
+
+@lru_cache(maxsize=4096)
+def _is_datetime(value):
+    if not DATETIME_PRECHECK.match(value):
+        return False
+
+    normalized = value.strip().replace(".", "-")
+
+    for fmt in DATETIME_FORMATS:
+        try:
+            datetime.strptime(normalized, fmt)
+            return True
+
+        except ValueError:
+            continue
+
+    return False
 
 def _is_float(value):
     return bool(FLOAT_PATTERN.match(value))
@@ -31,6 +62,9 @@ def _get_cell_type(value):
     if not isinstance(value, str):
         raise TypeError(f"Недопустимый тип данных: {type(value)}")
 
+    if _is_datetime(value):
+        return datetime
+
     if _is_int(value):
         return int
 
@@ -43,7 +77,7 @@ def _get_cell_type(value):
     return str
 
 def _merge_types(types):
-    if str in types or datetime in types:
+    if any(_type in types for _type in (str, datetime, bool)):
         raise TypeError(f"Несочетаемые типы данных: {types}")
 
     if float in types:
@@ -80,4 +114,5 @@ def infer_column_types(columns: list, rows: list) -> dict:
         elif len(column_types) > 1:
             types[columns[column_index]] = _merge_types(column_types)
 
+    _is_datetime.cache_clear()
     return types

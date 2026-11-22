@@ -58,9 +58,9 @@ def _get_table_data(path, headers, delimiter, encoding, newline):
 
     return column_names, data
 
-# создаёт таблицы из словарей, созданных в get_dictionary
-def load_table(*paths, headers=True, encoding="utf-8", delimiter=",",
-               newline="", auto_types=True):
+
+def load_table(*paths, headers=True, encoding: str ="utf-8", delimiter: str =",",
+               newline: str = "", auto_types: bool = True):
     if not paths:
         raise ValueError("Не передан ни один путь к файлу")
 
@@ -116,7 +116,7 @@ def _save_csv(rows, path, encoding, headers, delimiter, newline):
 
 
 def save_table(table: Table, name: str = "test", path: Path | str ="saved_test_files/", max_rows=None,
-               save_headers=True, delimiter=",", encoding="utf-8", newline=""):
+               save_headers=True, delimiter: str = ",", encoding="utf-8", newline=""):
     if not isinstance(table, Table):
         raise TypeError(f"Ожидалась Table, получено {type(table)}")
 
