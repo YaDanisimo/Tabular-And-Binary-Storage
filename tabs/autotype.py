@@ -1,4 +1,3 @@
-from .table import Table
 from datetime import datetime
 from functools import lru_cache
 import re
@@ -32,7 +31,7 @@ DATETIME_FORMATS = [
     "%Y-%m-%d %H:%M",
     "%Y-%m-%d",
 ]
-bool_map = {"true": True, "false": False}
+BOOL_MAP = {"true": True, "false": False}
 
 
 @lru_cache(maxsize=4096)
@@ -86,7 +85,7 @@ def _get_cell_type(value):
     if _is_float(value):
         return float
 
-    if value.lower() in bool_map:
+    if value.lower() in BOOL_MAP:
         return bool
 
     return str
@@ -124,7 +123,7 @@ def _cast_value(value, cur_type, new_type):
 
     if new_type is str:
         if cur_type is bool:
-            return "true" if cur_type else "false"
+            return "true" if value else "false"
 
         if cur_type is datetime:
             return value.isoformat()
@@ -140,8 +139,8 @@ def _cast_value(value, cur_type, new_type):
 
     if new_type is bool:
         if cur_type is str:
-            if value.lower() in bool_map:
-                return bool_map[value.lower()]
+            if value.lower() in BOOL_MAP:
+                return BOOL_MAP[value.lower()]
 
         elif cur_type is int:
             if value in (0, 1):
@@ -177,7 +176,15 @@ def _cast_value(value, cur_type, new_type):
     raise TypeError(f"Приведение из {cur_type} в {new_type} не поддерживается")
 
 
-def cast_column(data, column_index: int, cur_type, new_type):
+def _cast_column(data, column_index: int, cur_type, new_type):
+    """
+    Приводит значения столбца в указанный тип
+
+    data - ссылка на список строк таблицы
+    column_index - индекс столбца
+    cur_type - текущий тип значений в столбце
+    new_type - тип значений, в которой нужно привести значения
+    """
     if not data:
         return
 
@@ -200,15 +207,19 @@ def cast_column(data, column_index: int, cur_type, new_type):
         row[column_index] = new_value
 
 
-def infer_column_types(table: Table) -> dict:
-    get
+def autotype(table):
+    """
+    Автоматически определяет тип каждого столбца.
+    Переводит значения столбца в его тип.
+    """
+    columns, data, cur_types = table.unzip
     if not columns:
         raise ValueError("Отсутствуют названия столбцов")
 
-    types = {column: str for column in columns}
+    new_types = dict(cur_types)
 
     n_cols = len(columns)
-    for idx, row in enumerate(rows, start=1):
+    for idx, row in enumerate(data, start=1):
         if len(row) != n_cols:
             raise ValueError(
                 f"в {idx} строке {len(row)} полей вместо {n_cols}"
@@ -216,16 +227,18 @@ def infer_column_types(table: Table) -> dict:
 
     for column_index in range(n_cols):
         column_types = set()
-        for row in rows:
+        for row in data:
             cell_type = _get_cell_type(row[column_index])
             if cell_type is not None:
                 column_types.add(cell_type)
 
         col_name = columns[column_index]
         if len(column_types) == 1:
-            types[col_name] = next(iter(column_types))
+            new_types[col_name] = next(iter(column_types))
         elif len(column_types) > 1:
-            types[col_name] = _merge_types(column_types)
+            new_types[col_name] = _merge_types(column_types)
+
+        _cast_column(data, column_index, cur_types[col_name], new_types[col_name])
+        cur_types[col_name] = new_types[col_name]
 
     _is_datetime.cache_clear()
-    return types

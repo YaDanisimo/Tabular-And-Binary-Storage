@@ -1,5 +1,5 @@
 from .table import Table
-from .infer import infer_column_types
+from .autotype import autotype
 from pathlib import Path
 import csv
 
@@ -96,12 +96,10 @@ def load_table(*paths, headers=True, encoding: str ="utf-8", delimiter: str =","
             f"Таблица пуста (0 строк данных). Файлы: {paths}"
         )
 
-    types = (
-        infer_column_types(common_columns, all_data) if auto_types
-        else {column: str for column in common_columns}
-    )
+    table = Table(common_columns, all_data)
+    autotype(table)
 
-    return Table(common_columns, all_data, types)
+    return table
 
 
 def _save_csv(rows, path, encoding, headers, delimiter, newline):

@@ -1,6 +1,6 @@
 from copy import deepcopy
 from datetime import datetime
-from tabs.infer import infer_column_types
+from .autotype import autotype, _cast_column
 
 class Table:
     """
@@ -9,7 +9,7 @@ class Table:
     _types - словарь {столбец: тип}
     """
 
-    def __init__(self, columns: list[str], data: list[list], types: dict = None):
+    def __init__(self, columns: list[str], data: list[list], types: dict = None): # нужен ли types
         self._columns = list(columns)
         self._data = list(data)
 
@@ -45,6 +45,10 @@ class Table:
     @property
     def data(self):
         return deepcopy(self._data)
+
+    @property
+    def unzip(self): # не создаёт копии
+        return self._columns, self._data, self._types
 
     def __len__(self):
         return len(self._data)
@@ -102,7 +106,9 @@ class Table:
     """ДЛЯ ИЗМЕНЕНИЯ ДАННЫХ""" # set функции
 
 
-    def set_values(self, column, values):
+    def set_values(self, column, values): # будем ли вызывать ошибку если в
+                                          # столбце с типом int будет заменять всё на строки
+                                          # или лучше вызывать после этого что-то из autotype.py
         column = self._resolve_column(column)
 
         if len(values) != len(self._data):
@@ -110,7 +116,7 @@ class Table:
         for row, value in zip(self._data, values):
                 row[column] = value
 
-    def set_column_types(self, column_types):
+    def set_column_types(self, column_types): # используй _cast_column из autotype.py
         converted_columns = {}
 
         for col, col_type in column_types.items():
