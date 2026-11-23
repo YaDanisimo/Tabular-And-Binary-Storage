@@ -122,7 +122,7 @@ def save_table(table: Table, name: str = "test", path: Path | str ="saved_test_f
         raise ValueError(f"delimiter должен быть одним символом, получено {delimiter}")
 
     headers = table.columns if save_headers else None
-    data = table.data
+    _, data, _ = table.unzip
 
     base = Path(path) / name
 
