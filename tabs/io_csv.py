@@ -59,8 +59,8 @@ def _get_table_data(path, headers, delimiter, encoding, newline):
     return column_names, data
 
 
-def load_table(*paths, headers=True, encoding: str ="utf-8", delimiter: str =",",
-               newline: str = "", auto_types: bool = True):
+def load_table(*paths, headers=True, autotyping: bool = True, encoding: str ="utf-8", delimiter: str =",",
+               newline: str = ""):
     if not paths:
         raise ValueError("Не передан ни один путь к файлу")
 
@@ -97,7 +97,9 @@ def load_table(*paths, headers=True, encoding: str ="utf-8", delimiter: str =","
         )
 
     table = Table(common_columns, all_data)
-    autotype(table)
+
+    if autotyping:
+        autotype(table)
 
     return table
 
@@ -135,7 +137,7 @@ def save_table(table: Table, name: str = "test", path: Path | str ="saved_test_f
         right_border = max_rows
         data_size = len(data)
 
-        file_prefix = 0
+        file_prefix = 1
         while left_border < data_size:
             chunked_rows = data[left_border:right_border]
 

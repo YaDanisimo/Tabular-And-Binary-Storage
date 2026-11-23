@@ -8,8 +8,8 @@ __pycache__/
 *.so
 
 # ------------
-test/saved_test_files
-test/pickle_file_tests
+tests/saved_test_files/
+tests/pickle_file_tests/
 # ------------
 # Distribution / packaging
 .Python
