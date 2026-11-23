@@ -106,8 +106,8 @@ class Table:
     """ДЛЯ ИЗМЕНЕНИЯ ДАННЫХ""" # set функции
 
 
-    def set_values(self, column, values): # будем ли вызывать ошибку если в
-                                          # столбце с типом int будет заменять всё на строки
+    def set_values(self, column, values): # будем ли вызывать ошибку если
+                                          # в столбце с типом int будет заменять всё на строки
                                           # или лучше вызывать после этого что-то из autotype.py
         column = self._resolve_column(column)
 
