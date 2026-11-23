@@ -3,7 +3,6 @@ venv/
 .idea
 
 tests/saved_test_files/*
-tests/pickle_file_tests/*
 
 __pypackages__/
 __pycache__/
