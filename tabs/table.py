@@ -1,6 +1,6 @@
 from copy import deepcopy
 from datetime import datetime
-from .autotype import autotype, _cast_column
+from .autotype import autotype, _cast_column, _cast_value
 
 class Table:
     """
@@ -53,18 +53,11 @@ class Table:
     def __len__(self):
         return len(self._data)
 
+
     """ДЛЯ ПОЛУЧЕНИЯ ДАННЫХ""" # get функции
 
-    def get_values(self, column):
-        column = self._column_index(column)
-        values = []
 
-        for row in self._data:
-            values.append(row[column])
-
-        return values
-
-    def get_value(self, column):
+    def get_value(self, column=0):
 
         if len(self._data) != 1:
             raise ValueError('Ожидалась одна строка!')
@@ -72,6 +65,15 @@ class Table:
         value =  self.get_values(column)
 
         return value[0]
+
+    def get_values(self, column=0):
+        column = self._column_index(column)
+        values = []
+
+        for row in self._data:
+            values.append(row[column])
+
+        return values
 
     def get_rows_by_number(self, start, stop=None, copy_table=False):
         if stop is None:
@@ -101,50 +103,76 @@ class Table:
 
         return Table(self._columns, rows, self._types)
 
+    def get_column_types(self, by_number=True):
+        if not by_number:
+            return self.types
 
+        types = {}
+
+        for column_name, type_ in self.types.items():
+            column = self._column_index(column_name)
+            types[column] = type_
+
+        return types
 
     """ДЛЯ ИЗМЕНЕНИЯ ДАННЫХ""" # set функции
 
 
-    def set_values(self, column, values): # будем ли вызывать ошибку если
-                                          # в столбце с типом int будет заменять всё на строки
-                                          # или лучше вызывать после этого что-то из autotype.py
-        column = self._resolve_column(column)
-
-        if len(values) != len(self._data):
-            raise ValueError('Количество новых значений не равно количеству строк!')
-        for row, value in zip(self._data, values):
-                row[column] = value
-
-    def set_column_types(self, column_types): # используй _cast_column из autotype.py
-        converted_columns = {}
-
-        for col, col_type in column_types.items():
-            col = self._resolve_column(col)
-            values = self.get_values(col)
-            converted_values = []
-
-            for value in values:
-                converted_values.append(col_type(value))
-            converted_columns[col] = (col_type, converted_values)
-
-        for col, col_converted in converted_columns.items():
-            col_type, values = col_converted
-            self.set_values(col, values)
-            self._types[col] = col_type
-
-
-
-    def set_value(self, column, value):
-        column = self._resolve_column(column)
-
+    def set_value(self, value, column=0):  # Изменяет значение согласно ожидаемому и изменяет _data
         if len(self._data) != 1:
-            raise ValueError('Ожидался одна строка!')
+            raise ValueError('Ожидалась одна строка!')
+
+        column = self._column_index(column)
+        expected_type = self._types[self._columns[column]]
+
+        if value is not None and type(value) is not expected_type:
+            value = _cast_value(value, type(value), expected_type)
 
         self._data[0][column] = value
 
+    def set_values(self, values, column=0): # преобразуем новые значения под ожидаемый тип столбца
+        column = self._column_index(column)
+        expected_type = self._types[self._columns[column]]
+        converted_values = []
+
+        if len(values) != len(self._data):
+            raise ValueError('Количество новых значений не равно количеству строк!')
+
+        for value in values:
+            if type(value) is not expected_type and value is not None:
+                value = _cast_value(value, type(value), expected_type)
+            converted_values.append(value)
+
+        for new_value, old_row in zip(converted_values, self._data):
+            old_row[column] = new_value
+
+    def set_column_types(self, types_dict, by_number=True): # выполняет преобразование на глубокой копии, а затем заменяет данные и обновляет _types только у той таблицы, на которой его вызвали
+        data = deepcopy(self._data)
+        types = deepcopy(self._types)
+
+        for column, new_type in types_dict.items():
+            TypeErrors = False
+            if by_number and type(column) is not int:
+                TypeErrors = True
+            elif not by_number and type(column) is not str:
+                TypeErrors = True
+            if TypeErrors:
+                raise TypeError('Некорректный тип ключа!')
+
+            column_index = self._column_index(column)
+
+            column_name = self._columns[column_index]
+            cur_type = self._types[column_name]
+
+            _cast_column(data, column_index, cur_type, new_type)
+            types[column_name] = new_type
+
+        self._data = data
+        self._types = types
+
 
     """ВЫВОД ТАБЛИЦЫ"""
+
 
     def print_table(self):
         columns = self._columns  # list
@@ -198,5 +226,5 @@ class Table:
             print(str(i).rjust(index_width) + sep + formatted_row.rstrip())
 
     def __repr__(self):
-        return f"Table(columns={self._columns}, rows={len(self._data)}"
+        return f"Table(columns={self._columns}, rows={len(self._data)})"
 
