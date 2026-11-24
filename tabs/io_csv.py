@@ -43,7 +43,7 @@ def _get_table_data(path, headers, delimiter, encoding, newline):
     else:
         raise ValueError(
             f"header должен быть только True, None или list/tuple[str]\n"
-            f"получено {type(headers).__name__}"
+            f"получено {type(headers)}"
         )
 
     offset = 2 if headers is True else 1
