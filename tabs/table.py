@@ -170,6 +170,32 @@ class Table:
         self._data = data
         self._types = types
 
+    """ПОДДЕРЖКА ОПЕРАЦИЙ СРАВНЕНИЯ""" # САНЯ СЮДА ПИШЕШЬ
+
+    """ПОДДЕРЖКА АРИФМЕТИЧЕСКИХ ОПЕРАЦИЙ"""
+    def __add__(self, other):
+        if other.idi_naxyi
+
+    def __sub__(self, other):
+        pass
+
+    def __mul__(self, other):
+        pass
+
+    def __truediv__(self, other):
+        pass
+
+    def __radd__(self, other):
+        pass
+
+    def __rsub__(self, other):
+        pass
+
+    def __rmul__(self, other):
+        pass
+
+    def __rtruediv__(self, other):
+        pass
 
     """ВЫВОД ТАБЛИЦЫ"""
 
